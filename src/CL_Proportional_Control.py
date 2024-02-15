@@ -1,12 +1,18 @@
-import encoder_reader as ER
-import pyb
-import micropython
-import motor_driver as MD
-
-class ClosedLoop
+class ClosedLoop_P:
 
     def __init__ (self, Kp,setpoint):
+        self.kp = Kp
+        self.setpoint = setpoint
     
-    def run(self)
+    def run(self,position):
+        self.position = position
+        pwm = Kp*(self.setpoint-self.position)
+        return pwm
     
-    def set_setpoint
+    def set_setpoint(self,setpoint):
+        self.setpoint = setpoint
+        return print('setpoint:',self.setpoint)
+    
+    def set_kp(self,kp):
+        self.kp = kp
+        return print('Kp:',self.kp)
