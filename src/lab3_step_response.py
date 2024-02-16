@@ -13,17 +13,15 @@ https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.htm
 @copyright (c) 2023 by Spluttflob and released under the GNU Public Licenes V3
 """
 
-import math
 import time
 import tkinter
-from random import random
 import serial
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
                                                NavigationToolbar2Tk)
 
 # Creating serial to read port
-ser = serial.Serial('COM3')
+ser = serial.Serial('COM5')
 ser.baudrate = 115200
 ser.bytsize = 8
 ser.parity = 'N'
@@ -31,8 +29,7 @@ ser.stopbits = 1
 ser.timeout = 8
 
 # Create empty arrays to append data from microcontroller
-t_data = []
-p_data = []
+
 
 def plot_example(plot_axes, plot_canvas, xlabel, ylabel):
      """!
@@ -54,9 +51,12 @@ def plot_example(plot_axes, plot_canvas, xlabel, ylabel):
      """
      
      # Sends CTRL-D to serial port, rebooting it, and sends data
+     t_data = []
+     p_data = []
      ser.write(b'\x04')
-     print(ser.readline().decode('utf-8'))
-     
+
+     ser.write(input("Enter a Kp value:").encode('ascii'))
+     ser.write(b'\r')
      # Here we read the data from the microcontroller, and organize it accordingly with split and float commands
      # This is read from the USB-serial
      # A try block is used to filter out unusable data
@@ -64,6 +64,7 @@ def plot_example(plot_axes, plot_canvas, xlabel, ylabel):
 
      for line in range(300):
         try:
+            ser.write(b'\x02') # need, dont delete
             pos = ser.readline().decode('utf-8')
             pos = pos.split(',')
             
@@ -83,9 +84,7 @@ def plot_example(plot_axes, plot_canvas, xlabel, ylabel):
      plot_axes.set_xlabel('Time (ms)')
      plot_axes.set_ylabel('Encoder Position')
      plot_axes.grid(True)
-     
-     
- 
+     plot_canvas.draw()
  
 def tk_matplot(plot_function, xlabel, ylabel, title):
     """!
