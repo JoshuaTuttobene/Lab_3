@@ -21,15 +21,15 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
                                                NavigationToolbar2Tk)
 
 # Creating serial to read port
-ser = serial.Serial('COM5')
+ser = serial.Serial('COM3')
 ser.baudrate = 115200
 ser.bytsize = 8
 ser.parity = 'N'
 ser.stopbits = 1
 ser.timeout = 8
 
-# Create empty arrays to append data from microcontroller
 
+# Create empty arrays to append data from microcontroller
 
 def plot_example(plot_axes, plot_canvas, xlabel, ylabel):
      """!
@@ -49,42 +49,41 @@ def plot_example(plot_axes, plot_canvas, xlabel, ylabel):
      @param xlabel The label for the plot's horizontal axis
      @param ylabel The label for the plot's vertical axis
      """
-     
-     # Sends CTRL-D to serial port, rebooting it, and sends data
+     ser.write(b'\x04')
      t_data = []
      p_data = []
-     ser.write(b'\x04')
-
+     # Sends CTRL-D to serial port, rebooting it, and sends data
      ser.write(input("Enter a Kp value:").encode('ascii'))
      ser.write(b'\r')
      # Here we read the data from the microcontroller, and organize it accordingly with split and float commands
      # This is read from the USB-serial
      # A try block is used to filter out unusable data
      # Time in x-axis, and Voltage in y-axis
-
-     for line in range(300):
+     for line in range(1000):
         try:
             ser.write(b'\x02') # need, dont delete
             pos = ser.readline().decode('utf-8')
-            pos = pos.split(',')
-            
-            t = float(''.join(pos[0:1]))
-            p = float(''.join(pos[1:2]))
-            
-            # Append data by adding to end in array
-            t_data.append(t)
-            p_data.append(p)
+            if not pos == 'end':
+                pos = pos.split(',')
+                t = float(''.join(pos[0:1]))
+                p = float(''.join(pos[1:2]))
+                # Append data by adding to end in array
+                t_data.append(t)
+                p_data.append(p)
+            else:
+                break
 
         except ValueError:
-            print('invalid entry')
+            #print('invalid entry')
             pass
-
+     print(p_data)   
      # Draw the plot from the measured data 
      plot_axes.plot(t_data,p_data,'.', markersize=0.5)
      plot_axes.set_xlabel('Time (ms)')
      plot_axes.set_ylabel('Encoder Position')
      plot_axes.grid(True)
      plot_canvas.draw()
+     #ser.write(b'\x01')
  
 def tk_matplot(plot_function, xlabel, ylabel, title):
     """!
