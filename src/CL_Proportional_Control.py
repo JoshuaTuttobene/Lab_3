@@ -6,7 +6,7 @@ class ClosedLoop_P:
     
     def run(self,position):
         self.position = position
-        pwm = Kp*(self.setpoint-self.position)
+        pwm = self.kp*(self.setpoint-self.position)
         return pwm
     
     def set_setpoint(self,setpoint):

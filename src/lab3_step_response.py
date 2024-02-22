@@ -27,7 +27,7 @@ ser.bytsize = 8
 ser.parity = 'N'
 ser.stopbits = 1
 ser.timeout = 8
-
+ser.write(b'\x04')
 
 # Create empty arrays to append data from microcontroller
 
@@ -49,12 +49,12 @@ def plot_example(plot_axes, plot_canvas, xlabel, ylabel):
      @param xlabel The label for the plot's horizontal axis
      @param ylabel The label for the plot's vertical axis
      """
-     ser.write(b'\x04')
      t_data = []
      p_data = []
      # Sends CTRL-D to serial port, rebooting it, and sends data
      ser.write(input("Enter a Kp value:").encode('ascii'))
      ser.write(b'\r')
+     time.sleep(5)
      # Here we read the data from the microcontroller, and organize it accordingly with split and float commands
      # This is read from the USB-serial
      # A try block is used to filter out unusable data

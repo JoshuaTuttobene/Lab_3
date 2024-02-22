@@ -6,7 +6,7 @@ import cqueue
 import pyb
 import micropython
 
-print("please work")
+
 # init queue
 Queue_Size = 250
 time = cqueue.FloatQueue(Queue_Size)
@@ -27,20 +27,21 @@ tim8 = pyb.Timer(8, prescaler = 0, period = 2**16-1)
 encoder = ER.Encoder(pin_A, pin_B, tim8)
 
 # Controller init
-kp = float(input("Enter a Kp value:"))
-CL = CLPC.ClosedLoop_P(kp,50000) # use small Kp
-encoder.zero()
-init = utime.ticks_ms()
-#print(encoder.read())
-for val in range(Queue_Size):
-    pwm = CL.run(encoder.read())
-    motor.set_duty_cycle(pwm)
-    utime.sleep_ms(10)
-    time.put(utime.ticks_ms()-init)
-    pos.put(encoder.read())
-#print(encoder.read())
-for Queue_Size in range(250):
-    print(f"{time.get()}, {pos.get()}")
-    if time.any() == False:
-        print("end")
-        motor.set_duty_cycle(0)
+while True:
+    kp = float(input("Enter a Kp value:"))
+    CL = CLPC.ClosedLoop_P(kp,50000) # use small Kp
+    encoder.zero()
+    init = utime.ticks_ms()
+    for val in range(Queue_Size):
+        pwm = CL.run(encoder.read())
+        motor.set_duty_cycle(pwm)
+        utime.sleep_ms(10)
+        time.put(utime.ticks_ms()-init)
+        pos.put(encoder.read())
+    #print(encoder.read())
+    #print('please')
+    for Queue_Size in range(250):
+        print(f"{time.get()}, {pos.get()}")
+        if time.any() == False:
+            print("end")
+            motor.set_duty_cycle(0)
