@@ -1,5 +1,6 @@
 # Lab_3
 ME405 Lab 3
+
 Here are the results of our Proportional Control on the Motor for various Kp values:
 
 Kp just right:
