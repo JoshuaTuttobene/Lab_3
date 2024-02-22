@@ -1,15 +1,15 @@
 """!
-@file lab0_week2.py
-Run real or simulated dynamic response tests and plot the results. This program
-demonstrates a way to make a simple GUI with a plot in it. It uses Tkinter, an
-old-fashioned and ugly but useful GUI library which is included in Python by
+@file lab3_step_response.py
+Run a motor step response based on a user inputted Kp. This program cals the
+microcontroller to run and get data before plotting the closed loop PController step response.
+It uses Tkinter, an old-fashioned and ugly but useful GUI library which is included in Python by
 default.
 
 This file is based loosely on an example found at
 https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.html
 
 @author Aaron Escamilla, Karen Morales De Leon, Joshua Tuttobene
-@date   01/21/2024 Original program, based on example from above listed source
+@date   02/22/2024 Original program, based on example from above listed source
 @copyright (c) 2023 by Spluttflob and released under the GNU Public Licenes V3
 """
 
@@ -27,41 +27,36 @@ ser.bytsize = 8
 ser.parity = 'N'
 ser.stopbits = 1
 ser.timeout = 8
-ser.write(b'\x04')
+ser.write(b'\x04') # send ctrl-D to the serial port
 
-# Create empty arrays to append data from microcontroller
 
-def plot_example(plot_axes, plot_canvas, xlabel, ylabel):
+def run_step(plot_axes, plot_canvas, xlabel, ylabel):
      """!
-     Sends CTRL-D to serial port, rebooting it, and sends data
      
      Here we read the data from the microcontroller, and organize it accordingly with split and float commands
      This is read from the USB-serial
      A try block is used to filter out unusable data
-     Time in x-axis, and Voltage in y-axis
+     Time in x-axis, and Encoder Counts in y-axis
      
-     Theoretical data is also created to compare with the measured data
-     
-     Make a First Order Step Response plot with a GUI.
+     Make a Closed Loop P Controlled Motor response plot.
      The data was acquired from the microcontroller with a step-response file
      @param plot_axes The plot axes supplied by Matplotlib
      @param plot_canvas The plot canvas, also supplied by Matplotlib
      @param xlabel The label for the plot's horizontal axis
      @param ylabel The label for the plot's vertical axis
      """
+     # Create empty arrays to append data from microcontroller
      t_data = []
      p_data = []
-     # Sends CTRL-D to serial port, rebooting it, and sends data
+     # Takes user input and then sends to microcontroller
      ser.write(input("Enter a Kp value:").encode('ascii'))
      ser.write(b'\r')
-     time.sleep(5)
-     # Here we read the data from the microcontroller, and organize it accordingly with split and float commands
-     # This is read from the USB-serial
-     # A try block is used to filter out unusable data
-     # Time in x-axis, and Voltage in y-axis
+     time.sleep(5) # sleep to give the motor time to perform response
+     
+     # loop to get data from serial port until 'end' is printed, signifying the end of data
      for line in range(1000):
         try:
-            ser.write(b'\x02') # need, dont delete
+            ser.write(b'\x02') # need, dont delete, swith out of raw-REPL mode
             pos = ser.readline().decode('utf-8')
             if not pos == 'end':
                 pos = pos.split(',')
@@ -73,17 +68,16 @@ def plot_example(plot_axes, plot_canvas, xlabel, ylabel):
             else:
                 break
 
-        except ValueError:
+        except ValueError:     # anything that is not a data entry don't show
             #print('invalid entry')
             pass
-     print(p_data)   
+     #print(p_data)   
      # Draw the plot from the measured data 
      plot_axes.plot(t_data,p_data,'.', markersize=0.5)
      plot_axes.set_xlabel('Time (ms)')
      plot_axes.set_ylabel('Encoder Position')
      plot_axes.grid(True)
      plot_canvas.draw()
-     #ser.write(b'\x01')
  
 def tk_matplot(plot_function, xlabel, ylabel, title):
     """!
@@ -136,7 +130,7 @@ def tk_matplot(plot_function, xlabel, ylabel, title):
 # This main code is run if this file is the main program but won't run if this
 # file is imported as a module by some other main program
 if __name__ == "__main__":
-    tk_matplot(plot_example,
+    tk_matplot(run_step,
                xlabel="Time (ms)",
                ylabel="Encoder Position",
                title="Motor Step Response")

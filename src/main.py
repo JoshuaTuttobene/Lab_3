@@ -1,3 +1,12 @@
+"""!
+@file main.py
+Initializes a queue, motor, encoder, and controller to perform a closed loop step response
+and print data so it can be read via the serial port in a seperate file.
+
+@author Aaron Escamilla, Karen Morales De Leon, Joshua Tuttobene
+@date   02/22/2024 Original program, based on example from above listed source
+@copyright (c) 2023 by Spluttflob and released under the GNU Public Licenes V3
+"""
 import motor_driver as MD
 import encoder_reader as ER
 import CL_Proportional_Control as CLPC
@@ -28,20 +37,19 @@ encoder = ER.Encoder(pin_A, pin_B, tim8)
 
 # Controller init
 while True:
-    kp = float(input("Enter a Kp value:"))
+    kp = float(input("Enter a Kp value:"))  # input for Kp
     CL = CLPC.ClosedLoop_P(kp,50000) # use small Kp
-    encoder.zero()
-    init = utime.ticks_ms()
-    for val in range(Queue_Size):
-        pwm = CL.run(encoder.read())
-        motor.set_duty_cycle(pwm)
-        utime.sleep_ms(10)
-        time.put(utime.ticks_ms()-init)
-        pos.put(encoder.read())
-    #print(encoder.read())
-    #print('please')
-    for Queue_Size in range(250):
+    encoder.zero()  # zero encoder before using
+    init = utime.ticks_ms() # initial time
+    for val in range(Queue_Size):    # collect data for length of queue to fill
+        pwm = CL.run(encoder.read())  # set return from controller as pwm for motor
+        time.put(utime.ticks_ms()-init)   # put time into queue
+        pos.put(encoder.read())          # put position into queue
+        motor.set_duty_cycle(pwm)     # set new pwm
+        utime.sleep_ms(10)    # sleep 10 ms to give delay before next reading
+
+    for Queue_Size in range(250):  # for loop to print and empty queue
         print(f"{time.get()}, {pos.get()}")
         if time.any() == False:
-            print("end")
-            motor.set_duty_cycle(0)
+            print("end")     # print end to indicate completion of data
+            motor.set_duty_cycle(0) # turn off motor once data has been collected
