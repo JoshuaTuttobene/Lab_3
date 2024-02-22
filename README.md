@@ -16,5 +16,5 @@ Kp too low:
 ![image](https://github.com/JoshuaTuttobene/Lab_3/assets/107731390/ed1c4087-4c59-421c-90de-d18988c8b928)
 
 Bug Report: Our GUI is incapable of plotting the results of subsequent step responses without restarting the program. 
-We narrowed the problem down to the data transmission not getting transmitted through the serial port, but cannot figure out why this is.
+We narrowed the problem down to the data transmission not being accepted by our GUI, but cannot figure out why this is. Using PuTTY we were able to confirm that our main file does sucessfully take in Kp values and print data which can be read by the serial port.
 The results of our program sometimes change from run to run. This inconsistency makes debugging extraordinarily confusing.
